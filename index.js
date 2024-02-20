@@ -1,55 +1,86 @@
 const fs = require("fs");
-const utils = require('./Starter/utils');
+const util = require("util");
 const inquirer = require("inquirer");
-const generateMarkdown = require("./Starter/utils/generateMarkdown");
+const generateMarkdown = require("./Starter/util/generateMarkdown");
+const writeFileAsync = util.promisify(fs.writeFile);
 
 // array of questions for user
-// const questions = [
-
-// ];
-inquirer
-  .prompt([
-    {
-      type: 'input',
-      name: 'title',
-      message: 'What is the title of your project?',
-    },
-    {
-      type: 'section',
-      message: 'what is the Sections entitled:',
-    //   name: 'stack',
-      choices: ['Description', 'Table of Contents', 'installation', 'usage', 'license', 'contribution', 'test', 'questions'],
-    },
-    
-  ]) 
-
-
-// function to write README file
-function writeToFile(fileName, data) {
-    fs.writeFile(fileName, data, function(err){
-        console.log(fileName)
-        console.log(data)
-        if(err){
-            return console.log(err)    
-        }else{
-            console.log("success")
-        }
-    })
+// //Prompt the user questions to populate the README.md
+function promptUser(){
+  return inquirer.prompt([
+      {
+          type: "input",
+          name: "projectTitle",
+          message: "What is the project title?",
+      },
+      {
+          type: "input",
+          name: "description",
+          message: "Write a brief description of your project: "
+      },
+      {
+          type: "input",
+          name: "installation",
+          message: "Describe the installation process if any: ",
+      },
+      {
+          type: "input",
+          name: "usage",
+          message: "What is this project usage for?"
+      },
+      {
+          type: "list",
+          name: "license",
+          message: "Chose the appropriate license for this project: ",
+          choices: [
+              "Apache",
+              "Academic",
+              "GNU",
+              "ISC",
+              "MIT",
+              "Mozilla",
+              "Open"
+          ]
+      },
+      {
+          type: "input",
+          name: "contributing",
+          message: "Who are the contributors of this projects?"
+      },
+      {
+          type: "input",
+          name: "tests",
+          message: "Is there a test included?"
+      },
+      {
+          type: "input",
+          name: "questions",
+          message: "What do I do if I have an issue? "
+      },
+      {
+          type: "input",
+          name: "username",
+          message: "Please enter your GitHub username: "
+      },
+      {
+          type: "input",
+          name: "email",
+          message: "Please enter your email: "
+      }
+  ]);
 }
-// fs.readFile('data.csv', 'utf8', (error, data) =>
-//   error ? console.error(error) : console.log(data)
-// );
 
-// function to initialize program
-
-function init () {
-    inquirer.prompt(questions)
-    .then((data) => {   
-        fs.writeToFile("README.md", generateMarkdown, data);
-    })
-    .catch((err) => {
-        console.log(err);
-    })
+// Async function using util.promisify
+async function init() {
+  try {
+      // Ask user questions and generate responses
+      const answers = await promptUser();
+      const generateContent = generateMarkdown(answers);
+      // Write new README.md to dist directory
+      await writeFileAsync('./README.md', generateContent);
+      console.log('✔️  Successfully wrote to README.md');
+  }   catch(err) {
+      console.log(err);
+  }
 }
-// function call to initialize program
 init();
